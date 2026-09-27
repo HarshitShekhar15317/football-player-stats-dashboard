@@ -4,17 +4,22 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 
-# Load & Prepare Data 
+# ── Load Data (only 2024-2025) ───────────────────────────────────────────────
 file_path = "players_data-2024_2025.csv"
+
 try:
     df = pd.read_csv(file_path, encoding='utf-8')
 except UnicodeDecodeError:
     df = pd.read_csv(file_path, encoding='latin1')
+except FileNotFoundError:
+    st.error("File not found: players_data-2024_2025.csv")
+    st.stop()
 
+# Basic cleaning
 df['Min'] = pd.to_numeric(df['Min'], errors='coerce')
 df = df.dropna(subset=['Player', 'Squad', 'Pos', 'Comp'], how='any')
 
-# Sidebar Filters
+# ── Sidebar Filters ──────────────────────────────────────────────────────────
 st.sidebar.header("Filters")
 
 leagues = ['All'] + sorted(df['Comp'].dropna().unique().tolist())
@@ -27,6 +32,7 @@ player_search = st.sidebar.text_input("Search Player Name (partial match)").stri
 
 top_n = st.sidebar.slider("Number of players in leaderboards", 5, 50, 10, step=5)
 st.sidebar.markdown(f"Showing **top {top_n}** in each leaderboard")
+    
 
 # Apply search first (on full df)
 if player_search:
